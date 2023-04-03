@@ -129,7 +129,6 @@ export const Logs = observer(() => {
                 const contract = getShopContract(provider);
                 const filter = contract.filters.PausedChange();
                 const logs = await contract.queryFilter(filter);
-                console.log(logs)
                 setPausedChangeLogs(logs.map(({args}: { args: PausedChangeLogUnhandledType }) => pausedChangeLogArgsHandler(args)));
             }
         } catch (e: any) {
