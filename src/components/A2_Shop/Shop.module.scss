@@ -1,0 +1,17 @@
+@import "../../assets/style/app";
+
+.shop {
+  @include borderBlock;
+
+  .blockTitle {
+    @include blockTitle;
+  }
+
+  .infoBlock {
+    @include infoBlock;
+  }
+
+  .infoBlockColumn {
+    @include infoBlockColumn;
+  }
+}

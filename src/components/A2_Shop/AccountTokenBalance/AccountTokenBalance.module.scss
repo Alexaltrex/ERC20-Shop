@@ -1,0 +1,33 @@
+@import "../../../assets/style/app";
+
+.accountTokenBalance {
+  //@include infoBlock;
+
+  .top {
+    @include infoBlockColumn;
+
+    .label {
+      border-radius: 4px 0 0 0;
+    }
+
+    .value {
+      border-radius: 0 4px 0 0;
+    }
+  }
+
+  .form {
+    display: flex;
+    align-items: center;
+    padding: 12px 4px 18px;
+    box-sizing: border-box;
+    border-left: 2px solid royalblue;
+    border-right: 2px solid royalblue;
+    border-bottom: 2px solid royalblue;
+    border-radius: 0 0 4px 4px;
+
+    .field {
+      flex-grow: 1;
+    }
+
+  }
+}

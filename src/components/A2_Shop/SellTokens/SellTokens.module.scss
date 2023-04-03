@@ -1,0 +1,42 @@
+@import "../../../assets/style/app";
+
+.sellTokens {
+  @include infoBlock;
+
+  .label {
+    background: #7b1fa2;
+  }
+
+  .form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    border-left: 2px solid #9c27b0;
+    border-bottom: 2px solid #9c27b0;
+    border-right: 2px solid #9c27b0;
+    border-radius: 0 0 4px 4px;
+
+    .field input {
+      padding: 4.5px 14px;
+    }
+
+    .buyBtn {
+      @include centerRow;
+      border-radius: 0 0 2px 0;
+      height: 32px;
+
+      .preloaderWrapper {
+        position: relative;
+
+        .preloader {
+          width: 25px;
+          height: 25px;
+          position: absolute;
+          transform: translate(100%, -50%);
+          top: 50%;
+          right: -4px;
+        }
+      }
+    }
+
+  }
+}
