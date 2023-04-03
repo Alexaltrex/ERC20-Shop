@@ -6,16 +6,21 @@ import {
     IMintLog,
     MintLogUnhandledType,
     IPriceLog,
-    PriceLogUnhandledType, ILog
+    PriceLogUnhandledType, ILog, IPausedChangeLog, PausedChangeLogUnhandledType
 } from "../../types/types";
 import {chainId, getProvider, getShopContract} from "../../helpers/ethers.helper";
-import {buyLogArgsHandler, mintLogArgsHandler, priceLogArgsHandler} from "../../helpers/helpers";
+import {
+    buyLogArgsHandler,
+    mintLogArgsHandler,
+    pausedChangeLogArgsHandler,
+    priceLogArgsHandler
+} from "../../helpers/helpers";
 import {observer} from "mobx-react-lite";
 import {useStore} from "../../store/useStore";
 import {LogsTable} from "./LogsTable/LogsTable";
 
 export const Logs = observer(() => {
-    const { cryptoStore: { errorHandler } } = useStore();
+    const {cryptoStore: {errorHandler}} = useStore();
 
     const [buyLogs, setBuyLogs] = useState<IBuyLog[]>([]);
     const [sellLogs, setSellLogs] = useState<IBuyLog[]>([]);
@@ -23,6 +28,7 @@ export const Logs = observer(() => {
     const [burnLogs, setBurnLogs] = useState<IMintLog[]>([]);
     const [buyPriceLogs, setBuyPriceLogs] = useState<IPriceLog[]>([]);
     const [sellPriceLogs, setSellPriceLogs] = useState<IPriceLog[]>([]);
+    const [pausedChangeLogs, setPausedChangeLogs] = useState<IPausedChangeLog[]>([])
 
     //========= GET BUY LOGS =========//
     const getBuyLogs = async () => {
@@ -33,7 +39,7 @@ export const Logs = observer(() => {
                 const filter = contract.filters.Buy();
                 const logs = await contract.queryFilter(filter);
                 // console.log(logs)
-                setBuyLogs(logs.map(({args}: {args: BuyLogUnhandledType}) => buyLogArgsHandler(args)))
+                setBuyLogs(logs.map(({args}: { args: BuyLogUnhandledType }) => buyLogArgsHandler(args)))
             }
         } catch (e: any) {
             errorHandler(e)
@@ -48,7 +54,7 @@ export const Logs = observer(() => {
                 const contract = getShopContract(provider);
                 const filter = contract.filters.Sell();
                 const logs = await contract.queryFilter(filter);
-                setSellLogs(logs.map(({args}: {args: BuyLogUnhandledType}) => buyLogArgsHandler(args)))
+                setSellLogs(logs.map(({args}: { args: BuyLogUnhandledType }) => buyLogArgsHandler(args)))
             }
         } catch (e: any) {
             errorHandler(e)
@@ -63,7 +69,7 @@ export const Logs = observer(() => {
                 const contract = getShopContract(provider);
                 const filter = contract.filters.Mint();
                 const logs = await contract.queryFilter(filter);
-                setMintLogs(logs.map(({args}: {args: MintLogUnhandledType}) => mintLogArgsHandler(args)))
+                setMintLogs(logs.map(({args}: { args: MintLogUnhandledType }) => mintLogArgsHandler(args)))
             }
         } catch (e: any) {
             errorHandler(e)
@@ -78,7 +84,7 @@ export const Logs = observer(() => {
                 const contract = getShopContract(provider);
                 const filter = contract.filters.Burn();
                 const logs = await contract.queryFilter(filter);
-                setBurnLogs(logs.map(({args}: {args: MintLogUnhandledType}) => mintLogArgsHandler(args)))
+                setBurnLogs(logs.map(({args}: { args: MintLogUnhandledType }) => mintLogArgsHandler(args)))
             }
         } catch (e: any) {
             errorHandler(e)
@@ -93,7 +99,7 @@ export const Logs = observer(() => {
                 const contract = getShopContract(provider);
                 const filter = contract.filters.BuyPriceChange();
                 const logs = await contract.queryFilter(filter);
-                setBuyPriceLogs(logs.map(({args}: {args: PriceLogUnhandledType}) => priceLogArgsHandler(args)))
+                setBuyPriceLogs(logs.map(({args}: { args: PriceLogUnhandledType }) => priceLogArgsHandler(args)))
             }
         } catch (e: any) {
             errorHandler(e)
@@ -108,7 +114,23 @@ export const Logs = observer(() => {
                 const contract = getShopContract(provider);
                 const filter = contract.filters.SellPriceChange();
                 const logs = await contract.queryFilter(filter);
-                setSellPriceLogs(logs.map(({args}: {args: PriceLogUnhandledType}) => priceLogArgsHandler(args)))
+                setSellPriceLogs(logs.map(({args}: { args: PriceLogUnhandledType }) => priceLogArgsHandler(args)))
+            }
+        } catch (e: any) {
+            errorHandler(e)
+        }
+    }
+
+    //========= GET PAUSED CHANGE LOGS =========//
+    const getPausedChangeLogs = async () => {
+        try {
+            if (window.ethereum) {
+                const provider = getProvider();
+                const contract = getShopContract(provider);
+                const filter = contract.filters.PausedChange();
+                const logs = await contract.queryFilter(filter);
+                console.log(logs)
+                setPausedChangeLogs(logs.map(({args}: { args: PausedChangeLogUnhandledType }) => pausedChangeLogArgsHandler(args)));
             }
         } catch (e: any) {
             errorHandler(e)
@@ -189,6 +211,17 @@ export const Logs = observer(() => {
                         errorHandler(e)
                     }
                 })
+                // @ts-ignore
+                contract.on("PausedChange", async (...args) => {
+                    try {
+                        const event = args[args.length - 1];
+                        if (event.blockNumber > startBlockNumber) {
+                            await getPausedChangeLogs();
+                        }
+                    } catch (e: any) {
+                        errorHandler(e)
+                    }
+                })
             }
         } catch (e: any) {
             errorHandler(e)
@@ -211,6 +244,7 @@ export const Logs = observer(() => {
                     await getBurnLogs();
                     await getSellPriceLogs();
                     await getBuyPriceLogs();
+                    await getPausedChangeLogs();
                 }
             }
         }
@@ -225,7 +259,7 @@ export const Logs = observer(() => {
 
             <LogsTable tableLibel="Buy Tokens"
                        headerLabels={["buyer", "amount", "timestamp"]}
-                       // @ts-ignore
+                // @ts-ignore
                        logs={buyLogs}
                        headerClassName="header_buy"
                        rowClassName="row_buy"
@@ -233,7 +267,7 @@ export const Logs = observer(() => {
 
             <LogsTable tableLibel="Sell Tokens"
                        headerLabels={["buyer", "amount", "timestamp"]}
-                       // @ts-ignore
+                // @ts-ignore
                        logs={sellLogs}
                        headerClassName="header_buy"
                        rowClassName="row_buy"
@@ -241,7 +275,7 @@ export const Logs = observer(() => {
 
             <LogsTable tableLibel="Mint"
                        headerLabels={["amount", "timestamp"]}
-                       // @ts-ignore
+                // @ts-ignore
                        logs={mintLogs}
                        headerClassName="header_mint"
                        rowClassName="row_mint"
@@ -249,7 +283,7 @@ export const Logs = observer(() => {
 
             <LogsTable tableLibel="Burn"
                        headerLabels={["amount", "timestamp"]}
-                       // @ts-ignore
+                // @ts-ignore
                        logs={burnLogs}
                        headerClassName="header_mint"
                        rowClassName="row_mint"
@@ -257,7 +291,7 @@ export const Logs = observer(() => {
 
             <LogsTable tableLibel="BuyPriceChange"
                        headerLabels={["oldValue", "newValue", "timestamp"]}
-                       // @ts-ignore
+                // @ts-ignore
                        logs={buyPriceLogs}
                        headerClassName="header_price"
                        rowClassName="row_price"
@@ -270,7 +304,15 @@ export const Logs = observer(() => {
                        headerClassName="header_price"
                        rowClassName="row_price"
             />
-            
+
+            <LogsTable tableLibel="Paused change"
+                       headerLabels={["paused", "timestamp"]}
+                // @ts-ignore
+                       logs={pausedChangeLogs}
+                       headerClassName="header_paused"
+                       rowClassName="row_paused"
+            />
+
         </div>
     )
 })

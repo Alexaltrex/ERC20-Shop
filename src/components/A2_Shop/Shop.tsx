@@ -1,8 +1,8 @@
 import style from './Shop.module.scss'
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {observer} from "mobx-react-lite";
 import {useStore} from "../../store/useStore";
-import {chainId, getProvider, getShopContract} from "../../helpers/ethers.helper";
+import {chainId, getProvider} from "../../helpers/ethers.helper";
 import {Typography} from "@mui/material";
 import clsx from "clsx";
 import {AccountTokenBalance} from "./AccountTokenBalance/AccountTokenBalance";

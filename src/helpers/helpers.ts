@@ -1,6 +1,11 @@
 import {format} from 'date-fns'
 import {ethers} from "ethers";
-import {BuyLogUnhandledType, MintLogUnhandledType, PriceLogUnhandledType} from "../types/types";
+import {
+    BuyLogUnhandledType,
+    MintLogUnhandledType,
+    PausedChangeLogUnhandledType,
+    PriceLogUnhandledType
+} from "../types/types";
 
 export const getDate = (
     timestamp: number // sec
@@ -37,6 +42,16 @@ export const priceLogArgsHandler = (args: PriceLogUnhandledType) => (
     }) : ({
         oldValue: '',
         newValue: '',
+        timestamp: '',
+    })
+);
+
+export const pausedChangeLogArgsHandler = (args: PausedChangeLogUnhandledType) => (
+    args ? ({
+        paused: args[0] ? "paused" : "unpaused",
+        timestamp: getDate(args[1].toNumber()),
+    }) : ({
+        paused: '',
         timestamp: '',
     })
 );
